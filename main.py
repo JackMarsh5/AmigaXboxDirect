@@ -12,6 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+import asyncio
+import os
+
+DEBUG = os.getenv("DEBUG", "0") == "1"
+
+if not DEBUG:
+    from evdev import InputDevice, categorize, ecodes, list_devices
+else:
+    # Fake input for debug-only
+    InputDevice = None
+    categorize = None
+    ecodes = type("ecodes", (), {"ABS_X": 0, "ABS_Y": 1, "BTN_B": 2, "BTN_X": 3})()
+    def list_devices():
+        return []
 
 import argparse
 import asyncio

@@ -4,6 +4,13 @@ from inputs import get_gamepad
 from farm_ng.core.event_client import EventClient
 from farm_ng.core.event_service_pb2 import EventServiceConfig
 from farm_ng.canbus.twist_pb2 import Twist2d
+from fastapi import FastAPI
+from amiga_xbox_direct import bluetooth_api
+
+app = FastAPI()
+app.include_router(bluetooth_api.router)
+
+# Optional: your websocket or other app routes here
 
 def scale_axis(value):
     return (value - 128) / 128.0  # Convert 0–255 to -1.0 to 1.0

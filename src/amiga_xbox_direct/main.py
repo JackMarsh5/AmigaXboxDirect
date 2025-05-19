@@ -5,10 +5,9 @@ from farm_ng.core.event_client import EventClient
 from farm_ng.core.event_service_pb2 import EventServiceConfig
 from farm_ng.canbus.canbus_pb2 import Twist2d
 from farm_ng.canbus.twist_pb2 import Twist2d
-from amiga_xbox_direct import bluetooth_api
+from amiga_xbox_direct import bluetooth
 
 from fastapi import FastAPI
-from amiga_xbox_direct import bluetooth_api
 
 app = FastAPI()
 app.include_router(bluetooth_api.router)

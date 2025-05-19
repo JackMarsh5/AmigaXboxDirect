@@ -4,13 +4,15 @@ from inputs import get_gamepad
 from farm_ng.core.event_client import EventClient
 from farm_ng.core.event_service_pb2 import EventServiceConfig
 from farm_ng.core.pose_pb2 import Pose  # or another available type
-from amiga_xbox_direct import bluetooth as bluetooth_api
+from amiga_xbox_direct import bluetooth
+
 
 from fastapi import FastAPI
 
 app = FastAPI()
-app.include_router(bluetooth_api.router)
 
+
+app.include_router(bluetooth.router)
 # Optional: your websocket or other app routes here
 
 def scale_axis(value):

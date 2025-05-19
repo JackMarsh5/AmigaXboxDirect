@@ -4,7 +4,7 @@ from inputs import get_gamepad
 from farm_ng.core.event_client import EventClient
 from farm_ng.core.event_service_pb2 import EventServiceConfig
 from farm_ng.core.pose_pb2 import Pose  # or another available type
-from amiga_xbox_direct import bluetooth
+from amiga_xbox_direct import bluetooth as bluetooth_api
 
 from fastapi import FastAPI
 

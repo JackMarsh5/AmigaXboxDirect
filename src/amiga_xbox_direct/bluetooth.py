@@ -2,6 +2,14 @@ import subprocess
 import re
 import json
 from pathlib import Path
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/bluetooth/status")
+async def status():
+    return {"status": "Bluetooth service active"}
+
 
 KNOWN_DEVICES_FILE = Path("/tmp/paired_xbox.json")  # Adjust path if persistent storage is preferred
 

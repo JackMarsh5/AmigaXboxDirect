@@ -3,4 +3,4 @@
 
 cd /mnt/managed_home/farm-ng-user-jmarsh/AmigaXboxDirect
 source venv/bin/activate
-python3 -m AmigaXboxDirect.main
+python3 -m amiga_xbox_direct.main

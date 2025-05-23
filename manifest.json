@@ -3,7 +3,7 @@
     "amiga-xbox-direct": {
       "name": "amiga-xbox-direct",
       "type": "app",
-      "exec_cmd": "/mnt/managed_home/farm-ng-user-YOURUSERNAME/amiga-xbox-direct/entry.sh",
+      "exec_cmd": "/mnt/managed_home/farm-ng-user-jmarsh/amiga-xbox-direct/entry.sh",
       "display_name": "Amiga Xbox Controller"
     }
   }

@@ -2,20 +2,27 @@ import subprocess
 import re
 import json
 import logging
+import time
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 
+# Use this router reference in main.py
+# from amiga_xbox_direct.bluetooth import router as bluetooth_router
 router = APIRouter()
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("bluetooth_service")
+logger = logging.getLogger("amiga_xbox_direct.bluetooth")
 
 @router.get("/bluetooth/status")
 async def status():
     return {"status": "Bluetooth service active"}
 
-KNOWN_DEVICES_FILE = Path("/tmp/paired_xbox.json")  # Adjust path if persistent storage is preferred
+# Use persistent file path under managed home
+KNOWN_DEVICES_FILE = Path("/mnt/managed_home/farm-ng-user-jmarsh/AmigaXboxDirect/data/paired_xbox.json")
+
+# Ensure the data directory exists
+KNOWN_DEVICES_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 def run_bluetoothctl_commands(commands):
     """Run a sequence of bluetoothctl commands."""
@@ -33,7 +40,7 @@ def scan_devices(timeout_sec=8):
     """Scan for nearby Bluetooth devices."""
     try:
         subprocess.run(["bluetoothctl", "scan", "on"], check=True)
-        subprocess.run(["sleep", str(timeout_sec)])
+        time.sleep(timeout_sec)
         subprocess.run(["bluetoothctl", "scan", "off"], check=True)
 
         output = subprocess.run(["bluetoothctl", "devices"], capture_output=True, text=True).stdout

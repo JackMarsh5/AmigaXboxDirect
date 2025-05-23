@@ -1,39 +1,54 @@
 import asyncio
-from inputs import get_gamepad
+from inputs import get_gamepad, UnpluggedError
 from farm_ng.core.event_client import EventServiceConfig, EventClient
 from farm_ng.amiga.v1.canbus_pb2 import Twist2d
-from libs.joystick_utils import scale_axis, Vec2
 
-# Helper function to convert joystick pose to Twist2d
-def vec2_to_twist(vec: Vec2) -> Twist2d:
-    twist = Twist2d()
-    twist.linear_velocity_x = vec.y
-    twist.angular_velocity = -vec.x
-    return twist
+# Helper function to scale Xbox joystick input
+def scale_axis(value):
+    return (value - 128) / 128.0  # Convert 0–255 to -1.0 to 1.0
 
-# Async control loop for Xbox input
+# Async control loop for Xbox input with reconnection loop and connection-loss failsafe
 async def run_joystick_control(canbus_client):
     print("[INFO] Listening for Xbox joystick input...")
-    pose = Vec2()
 
     while True:
-        events = get_gamepad()
-        for e in events:
-            if e.code == "ABS_X":
-                pose.x = scale_axis(e.state)
-            elif e.code == "ABS_Y":
-                pose.y = scale_axis(e.state)
-            elif e.code == "BTN_NORTH":  # Emergency stop
-                print("[EMERGENCY STOP]")
-                pose = Vec2()
-                await canbus_client.request_reply("/twist", vec2_to_twist(pose))
-                return
-            elif e.code == "BTN_EAST":  # Exit
-                print("[Exit requested]")
-                return
+        try:
+            pose = Twist2d()
+            while True:
+                try:
+                    events = get_gamepad()
+                except UnpluggedError:
+                    print("[WARNING] Controller disconnected. Sending zero velocity.")
+                    pose.linear_velocity_x = 0.0
+                    pose.angular_velocity = 0.0
+                    await canbus_client.request_reply("/twist", pose)
+                    await asyncio.sleep(1)
+                    continue
 
-        await canbus_client.request_reply("/twist", vec2_to_twist(pose))
-        await asyncio.sleep(0.05)
+                for e in events:
+                    if e.code == "ABS_X":
+                        pose.angular_velocity = -scale_axis(e.state)
+                    elif e.code == "ABS_Y":
+                        pose.linear_velocity_x = scale_axis(e.state)
+                    elif e.code == "BTN_NORTH":
+                        print("[EMERGENCY STOP]")
+                        pose.linear_velocity_x = 0.0
+                        pose.angular_velocity = 0.0
+                        await canbus_client.request_reply("/twist", pose)
+                        raise RuntimeError("Emergency stop triggered")
+                    elif e.code == "BTN_EAST":
+                        print("[Exit requested]")
+                        raise KeyboardInterrupt
+
+                await canbus_client.request_reply("/twist", pose)
+                await asyncio.sleep(0.05)
+
+        except (RuntimeError, KeyboardInterrupt):
+            print("[INFO] Stopped control loop. Waiting to resume...")
+            await asyncio.sleep(1)
+            if isinstance(RuntimeError, Exception):
+                continue
+            break
 
 # Main entry point
 def main():

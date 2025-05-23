@@ -7,18 +7,24 @@
     },
     {
       "name": "canbus",
-      "port": 6001,
+      "port": 50060,
+      "host": "localhost",
+      "subscriptions": [
+        {
+          "uri": "/state",
+          "every_n": 5
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "port": 20001,
       "host": "localhost"
     },
     {
-        "name": "filter",
-        "port": 20001,
-        "host": "localhost"
-    },
-    {
-        "name": "track_follower",
-        "port": 20101,
-        "host": "localhost"
+      "name": "track_follower",
+      "port": 20101,
+      "host": "localhost"
     },
     {
       "name": "system_monitor",

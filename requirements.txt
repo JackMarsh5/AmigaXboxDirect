@@ -1,5 +1,0 @@
-inputs
-farm-ng-amiga
-protobuf
-fastapi
-uvicorn

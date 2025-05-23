@@ -2,8 +2,8 @@ import asyncio
 from inputs import get_gamepad
 from farm_ng.core.event_client import EventServiceConfig, EventClient
 from farm_ng.amiga.v1.canbus_pb2 import Twist2d  # Ensure this import is correct
-from amiga_xbox_direct import bluetooth
 from fastapi import FastAPI
+from bluetooth import router as bluetooth_router
 
 # FastAPI app setup (optional web interface)
 app = FastAPI()

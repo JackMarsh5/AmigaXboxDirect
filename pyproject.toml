@@ -9,7 +9,7 @@ description = "Xbox controller input to drive Farm-ng Amiga robot over gRPC"
 authors = [
   { name="Jack Marsh" }
 ]
-license = "MIT"
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
 
 [tool.setuptools.packages.find]

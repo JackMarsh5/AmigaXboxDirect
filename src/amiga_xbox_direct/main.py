@@ -1,42 +1,38 @@
 import asyncio
 from inputs import get_gamepad
 from farm_ng.core.event_client import EventServiceConfig, EventClient
-from farm_ng.amiga.v1.canbus_pb2 import Twist2d  # Ensure this import is correct
-from fastapi import FastAPI
-from bluetooth import router as bluetooth_router
-from amiga_xbox_direct import canbus_client
+from farm_ng.amiga.v1.canbus_pb2 import Twist2d
+from libs.joystick_utils import scale_axis, Vec2
 
-# FastAPI app setup (optional web interface)
-app = FastAPI()
-app.include_router(bluetooth.router)
-
-# Helper function to scale Xbox joystick input
-def scale_axis(value):
-    return (value - 128) / 128.0  # Convert 0–255 to -1.0 to 1.0
+# Helper function to convert joystick pose to Twist2d
+def vec2_to_twist(vec: Vec2) -> Twist2d:
+    twist = Twist2d()
+    twist.linear_velocity_x = vec.y
+    twist.angular_velocity = -vec.x
+    return twist
 
 # Async control loop for Xbox input
 async def run_joystick_control(canbus_client):
     print("[INFO] Listening for Xbox joystick input...")
-    
+    pose = Vec2()
+
     while True:
         events = get_gamepad()
-        msg = Twist2d()
         for e in events:
-            if e.code == "ABS_X":  # Left joystick horizontal
-                msg.angular_velocity = -scale_axis(e.state)
-            elif e.code == "ABS_Y":  # Left joystick vertical
-                msg.linear_velocity_x = scale_axis(e.state)
-            elif e.code == "BTN_NORTH":  # X button (emergency stop)
+            if e.code == "ABS_X":
+                pose.x = scale_axis(e.state)
+            elif e.code == "ABS_Y":
+                pose.y = scale_axis(e.state)
+            elif e.code == "BTN_NORTH":  # Emergency stop
                 print("[EMERGENCY STOP]")
-                msg.linear_velocity_x = 0.0
-                msg.angular_velocity = 0.0
-                await canbus_client.request_reply("/twist", msg)
+                pose = Vec2()
+                await canbus_client.request_reply("/twist", vec2_to_twist(pose))
                 return
-            elif e.code == "BTN_EAST":  # B button (exit)
+            elif e.code == "BTN_EAST":  # Exit
                 print("[Exit requested]")
                 return
 
-        await canbus_client.request_reply("/twist", msg)
+        await canbus_client.request_reply("/twist", vec2_to_twist(pose))
         await asyncio.sleep(0.05)
 
 # Main entry point

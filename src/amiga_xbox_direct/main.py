@@ -8,6 +8,21 @@ from amiga_xbox_direct import bluetooth
 
 
 from fastapi import FastAPI
+from farm_ng.core.event_client import EventServiceConfig, EventClient
+from my_project.controller_input import run_controller_loop  # your module
+
+def main():
+    # Load gRPC service config
+    config = EventServiceConfig.from_file("service_config.json")
+    
+    # Create canbus client
+    canbus_client = EventClient(config.service("canbus"))
+
+    # Start controller input loop (pass in the client)
+    run_controller_loop(canbus_client)
+
+if __name__ == "__main__":
+    main()
 
 app = FastAPI()
 

@@ -1,5 +1,15 @@
 import evdev
 from farm_ng.amiga import Twist2d  # assuming Twist2d message class is provided here
+from farm_ng.amiga.v1.amiga_pb2 import Twist2d
+
+def run_controller_loop(canbus_client):
+    while True:
+        # Read input (simplified)
+        twist = Twist2d()
+        twist.linear_velocity_x = 1.0
+        twist.angular_velocity = 0.5
+        canbus_client.request_reply("/twist", twist)
+        time.sleep(0.1)
 
 # Find the controller device by name or by available inputs
 dev = None

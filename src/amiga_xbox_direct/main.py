@@ -1,61 +1,48 @@
 import asyncio
-import os
 from inputs import get_gamepad
-from farm_ng.core.event_client import EventClient
-from farm_ng.core.event_service_pb2 import EventServiceConfig
-from farm_ng.core.pose_pb2 import Pose  # or another available type
-from amiga_xbox_direct import bluetooth
-
-
-from fastapi import FastAPI
 from farm_ng.core.event_client import EventServiceConfig, EventClient
-from my_project.controller_input import run_controller_loop  # your module
+from farm_ng.amiga.v1.canbus_pb2 import Twist2d  # Ensure this import is correct
+from amiga_xbox_direct import bluetooth
+from fastapi import FastAPI
 
-def main():
-    # Load gRPC service config
-    config = EventServiceConfig.from_file("service_config.json")
-    
-    # Create canbus client
-    canbus_client = EventClient(config.service("canbus"))
-
-    # Start controller input loop (pass in the client)
-    run_controller_loop(canbus_client)
-
-if __name__ == "__main__":
-    main()
-
+# FastAPI app setup (optional web interface)
 app = FastAPI()
-
-
 app.include_router(bluetooth.router)
-# Optional: your websocket or other app routes here
 
+# Helper function to scale Xbox joystick input
 def scale_axis(value):
     return (value - 128) / 128.0  # Convert 0–255 to -1.0 to 1.0
 
-async def run_joystick_control():
-    client = EventClient(EventServiceConfig(name="track_follower", port=20101, host="localhost"))
+# Async control loop for Xbox input
+async def run_joystick_control(canbus_client):
     print("[INFO] Listening for Xbox joystick input...")
-
+    
     while True:
         events = get_gamepad()
         msg = Twist2d()
         for e in events:
             if e.code == "ABS_X":  # Left joystick horizontal
-                msg.angular = -scale_axis(e.state)
+                msg.angular_velocity = -scale_axis(e.state)
             elif e.code == "ABS_Y":  # Left joystick vertical
-                msg.linear = scale_axis(e.state)
-            elif e.code == "BTN_NORTH":  # X button
+                msg.linear_velocity_x = scale_axis(e.state)
+            elif e.code == "BTN_NORTH":  # X button (emergency stop)
                 print("[EMERGENCY STOP]")
-                msg.linear = 0
-                msg.angular = 0
-                await client.request_reply("/cmd_vel", msg)
+                msg.linear_velocity_x = 0.0
+                msg.angular_velocity = 0.0
+                await canbus_client.request_reply("/twist", msg)
                 return
-            elif e.code == "BTN_EAST":  # B button
+            elif e.code == "BTN_EAST":  # B button (exit)
                 print("[Exit requested]")
                 return
-        await client.request_reply("/cmd_vel", msg)
+
+        await canbus_client.request_reply("/twist", msg)
         await asyncio.sleep(0.05)
 
+# Main entry point
 def main():
-    asyncio.run(run_joystick_control())
+    config = EventServiceConfig.from_file("service_config.json")
+    canbus_client = EventClient(config.service("canbus"))
+    asyncio.run(run_joystick_control(canbus_client))
+
+if __name__ == "__main__":
+    main()

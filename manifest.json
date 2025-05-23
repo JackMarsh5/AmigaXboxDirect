@@ -1,7 +1,10 @@
 {
-  "id": "amiga-xbox-direct",
-  "name": "Amiga Xbox Direct Controller",
-  "version": "0.1.0",
-  "description": "Streams joystick control commands to the Amiga via CAN.",
-  "entry_point": "launch/joystick_app.launch.py"
+  "services": {
+    "amiga-xbox-direct": {
+      "name": "amiga-xbox-direct",
+      "type": "app",
+      "exec_cmd": "/mnt/managed_home/farm-ng-user-YOURUSERNAME/amiga-xbox-direct/entry.sh",
+      "display_name": "Amiga Xbox Controller"
+    }
+  }
 }

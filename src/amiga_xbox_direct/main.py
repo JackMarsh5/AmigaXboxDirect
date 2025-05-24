@@ -2,7 +2,7 @@
 import asyncio
 from inputs import get_gamepad, UnpluggedError
 from farm_ng.core.event_client import EventServiceConfig, EventClient
-from farm_ng.amiga.v1.canbus_pb2 import Twist2d
+from farm_ng.amiga.canbus_pb2 import Twist2d
 from libs.joystick_utils import scale_axis, Vec2
 
 # Helper function to convert joystick pose to Twist2d
@@ -61,3 +61,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -3,6 +3,11 @@ import asyncio
 from inputs import get_gamepad, UnpluggedError
 #from farm_ng.core.event_client import EventServiceConfig, EventClient
 from farm_ng.canbus.canbus_pb2 import Twist2d
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../libs"))
+
 from libs.joystick_utils import scale_axis, Vec2
 import json
 from farm_ng.core.event_client import EventServiceConfig, EventClient

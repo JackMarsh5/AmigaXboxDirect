@@ -1,7 +1,7 @@
 # File: main.py
 import asyncio
 from inputs import get_gamepad, UnpluggedError
-from farm_ng.core.event_client import EventServiceConfig, EventClient
+#from farm_ng.core.event_client import EventServiceConfig, EventClient
 from farm_ng.canbus.canbus_pb2 import Twist2d
 from libs.joystick_utils import scale_axis, Vec2
 import json
@@ -84,9 +84,9 @@ def main():
            config.host = service["host"]
            config.port = service["port"]
            break
-else:
-    raise RuntimeError("canbus service not found in config")
-    asyncio.run(run_joystick_control(canbus_client))
+   else:
+       raise RuntimeError("canbus service not found in config")
+       asyncio.run(run_joystick_control(canbus_client))
 
 if __name__ == "__main__":
     main()

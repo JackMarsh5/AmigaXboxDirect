@@ -47,6 +47,9 @@ async def run_joystick_control(canbus_client):
                     continue
 
                 for e in events:
+                    def debug_joystick_input(msg):
+                        print(f"🕹️  Input - Linear: {msg.linear_velocity_x:.2f}, Angular: {msg.angular_velocity:.2f}")
+
                     if e.code == "ABS_X":
                         pose.x = scale_axis(e.state)
                     elif e.code == "ABS_Y":
@@ -59,7 +62,7 @@ async def run_joystick_control(canbus_client):
                     elif e.code == "BTN_EAST":
                         print("[Exit requested]")
                         raise KeyboardInterrupt
-
+                debug_joystick_input(msg)
                 await canbus_client.request_reply("/twist", vec2_to_twist(pose))
                 await asyncio.sleep(0.05)
 

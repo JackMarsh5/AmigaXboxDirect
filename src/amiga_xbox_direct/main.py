@@ -72,7 +72,7 @@ async def run_joystick_control(canbus_client):
 
 # Main entry point
 def main():
-  print("✅ main() is running")
+    print("✅ main() is running")
 
    with open("service_config.json", "r") as f:
     config_data = json.load(f)

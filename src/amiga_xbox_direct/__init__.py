@@ -1,4 +1,4 @@
-from farm_ng.core import EventClient, EventServiceConfig
+from farm_ng.core.event_client import EventClient, EventServiceConfig
 
 # ... inside your app initialization:
 service_cfg = EventServiceConfig.from_file("service_config.json")  # load our config with canbus details

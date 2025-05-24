@@ -4,6 +4,23 @@ from inputs import get_gamepad, UnpluggedError
 from farm_ng.core.event_client import EventServiceConfig, EventClient
 from farm_ng.canbus.canbus_pb2 import Twist2d
 from libs.joystick_utils import scale_axis, Vec2
+import json
+from farm_ng.core.event_client import EventServiceConfig, EventClient
+
+with open("service_config.json", "r") as f:
+    config_data = json.load(f)
+
+for service in config_data["configs"]:
+    if service["name"] == "canbus":
+        service_cfg = EventServiceConfig()
+        service_cfg.name = service["name"]
+        service_cfg.host = service["host"]
+        service_cfg.port = service["port"]
+        break
+else:
+    raise RuntimeError("canbus service not found in config")
+
+canbus_client = EventClient(service_cfg)
 
 # Helper function to convert joystick pose to Twist2d
 def vec2_to_twist(vec: Vec2) -> Twist2d:
@@ -55,8 +72,18 @@ async def run_joystick_control(canbus_client):
 
 # Main entry point
 def main():
-    config = EventServiceConfig.from_file("service_config.json")
-    canbus_client = EventClient(config.service("canbus"))
+   with open("service_config.json", "r") as f:
+    config_data = json.load(f)
+
+for service in config_data["configs"]:
+    if service["name"] == "canbus":
+        config = EventServiceConfig()
+        config.name = service["name"]
+        config.host = service["host"]
+        config.port = service["port"]
+        break
+else:
+    raise RuntimeError("canbus service not found in config")
     asyncio.run(run_joystick_control(canbus_client))
 
 if __name__ == "__main__":
